@@ -1,11 +1,9 @@
-import React from 'react'
+// src/pages/AdminDashboardPage.jsx
+import React from 'react';
+import AdminDashboard from '../components/admin/AdminDashboard';
 
 const AdminDashboardPage = () => {
-  return (
-    <div>
-      <h1>admindashboard</h1>
-    </div>
-  )
-}
+  return <AdminDashboard />;
+};
 
-export default AdminDashboardPage
+export default AdminDashboardPage;

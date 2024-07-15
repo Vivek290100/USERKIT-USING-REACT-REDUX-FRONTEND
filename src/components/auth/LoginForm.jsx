@@ -21,11 +21,18 @@ const LoginForm = () => {
       // Perform login API call and get user and token
     const response = await axios.post('/api/auth/login', { email, password });
     const { user, token } = response.data;
-    console.log("user",user);
-    console.log("token",token);
+
     dispatch(setUser(user));
     dispatch(setToken(token));
-    navigate('/profile')
+
+    console.log("user",user);
+    console.log("token",token);
+
+    if (user.role === 'admin') {
+      navigate('/admin/dashboard')
+    }else{
+      navigate('/profile')
+    }
     }catch (error) {
       console.error('Login failde', error);
       if (error.response && error.response.status === 401) {
