@@ -1,7 +1,7 @@
 // src/components/auth/LoginForm.jsx
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setUser, setToken } from '../../features/auth/authSlice';
+import { setUser, setToken } from '../../redux/features/auth/authSlice';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -10,7 +10,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate()
-  const [error, setError] = useState(null); // State to hold login errors
+  const [error, setError] = useState(null); 
 
 
 
@@ -18,7 +18,6 @@ const LoginForm = () => {
     e.preventDefault();
     setError(null);
     try {
-      // Perform login API call and get user and token
     const response = await axios.post('/api/auth/login', { email, password });
     const { user, token } = response.data;
 
@@ -27,12 +26,8 @@ const LoginForm = () => {
 
     console.log("user",user);
     console.log("token",token);
+    navigate("/")
 
-    if (user.role === 'admin') {
-      navigate('/admin/dashboard')
-    }else{
-      navigate('/profile')
-    }
     }catch (error) {
       console.error('Login failde', error);
       if (error.response && error.response.status === 401) {
@@ -49,7 +44,7 @@ const LoginForm = () => {
     <header className="bg-gray-800 p-4">
       <div className="container mx-auto">
         <div className="text-white text-2xl font-bold">
-          <a href="/">User Management</a>
+          <a href="/">USERKIT</a>
         </div>
       </div>
     </header>
@@ -82,16 +77,10 @@ const LoginForm = () => {
               autoComplete='current-password'
             />
           </div>
-          {error && <p className="text-red-500">{error}</p>} {/* Display error message if any */}
+          {error && <p className="text-red-500">{error}</p>} 
 
-          <div className="flex items-center justify-between">
-            <label className="flex items-center">
-              <input 
-                type="checkbox" 
-                className="form-checkbox h-4 w-4 text-blue-600" 
-              />
-              <span className="ml-2 text-gray-600">Remember me</span>
-            </label>
+          <div className="flex items-center justify-end">
+
             <a href="#" className="text-blue-600 hover:underline">Forgot password?</a>
           </div>
           <button 

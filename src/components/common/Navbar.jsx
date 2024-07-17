@@ -1,8 +1,7 @@
-// src/components/common/Navbar.jsx
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { clearAuth } from '../../features/auth/authSlice';
+import { clearAuth } from '../../redux/features/auth/authSlice';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,13 +18,13 @@ const Navbar = () => {
     <nav className="bg-gray-800 p-4">
       <div className="container mx-auto flex justify-between items-center">
         <div className="text-white text-2xl px-9 font-bold">
-          <Link to="/">Logo</Link>
+          <Link to="/">USERKIT</Link>
         </div>
         <div className="hidden md:flex space-x-12 items-center">
           <Link to="/" className="text-gray-300 hover:text-white">Home</Link>
-          <Link to="/about" className="text-gray-300 hover:text-white">About</Link>
-          <Link to="/services" className="text-gray-300 hover:text-white">Services</Link>
-          <Link to="/contact" className="text-gray-300 hover:text-white">Contact</Link>
+          <Link to="/" className="text-gray-300 hover:text-white">Services</Link>
+          <Link to="/" className="text-gray-300 hover:text-white">About</Link>
+          <Link to="/" className="text-gray-300 hover:text-white">Contact</Link>
           {user ? (
             // Show logout button when user is logged in
             <button onClick={handleLogout} className="text-gray-300 hover:text-white focus:outline-none">
