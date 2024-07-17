@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { setError, setLoading, setToken, setUser } from '../../features/auth/authSlice';
+import { setError, setLoading, setToken, setUser } from '../../redux/features/auth/authSlice';
 
 const SignUpForm = () => {
     const [name, setName] = useState('');
@@ -46,7 +46,7 @@ const SignUpForm = () => {
             <header className="bg-gray-800 p-4">
                 <div className="container mx-auto flex justify-between items-center">
                     <div className="text-white text-2xl font-bold">
-                        <a href="/">User Management</a>
+                        <a href="/">USERKIT</a>
                     </div>
                 </div>
             </header>
