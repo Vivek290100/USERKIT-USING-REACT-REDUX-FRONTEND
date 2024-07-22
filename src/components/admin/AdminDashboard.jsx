@@ -1,100 +1,196 @@
-import React from 'react';
-import { FaUsers, FaChartBar, FaCog, FaEnvelope } from 'react-icons/fa';
-import AdminNavbar from '../common/AdminNavbar';
+// AdminDashboard.jsx
+import React, { useEffect, useState } from "react";
+import { FaUsers, FaSearch } from "react-icons/fa";
+import AdminNavbar from "../common/AdminNavbar";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import UserRow from "./UserRow";
+import EditUserModal from "./EditUserModal";
 
 const AdminDashboard = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editUser, setEditUser] = useState(null);
+  const usersPerPage = 10;
+  const token = useSelector((state) => state.auth.token);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/admin/getUsers", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsers(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Failed to fetch users. Please try again."
+      );
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [token]);
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleDelete = async (email) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/admin/deleteUser/${email}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUsers(users.filter((user) => user.email !== email));
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Failed to delete user. Please try again."
+      );
+    }
+  };
+
+  const handleEditClick = (user) => {
+    setEditUser(user);
+  };
+
+  const handleUpdateUser = () => {
+    fetchUsers(); // Refresh the user list
+    setEditUser(null);
+  };
+
+
+  
+  
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <>
-    <AdminNavbar/>
-    <div className="bg-gray-100 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <DashboardCard icon={<FaUsers />} title="Total Users" value="1,234" />
-          <DashboardCard icon={<FaChartBar />} title="Revenue" value="$45,678" />
-          <DashboardCard icon={<FaEnvelope />} title="New Messages" value="18" />
-          <DashboardCard icon={<FaCog />} title="System Health" value="98%" />
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">User List</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead>
-                <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                  <th className="py-3 px-6 text-left">Name</th>
-                  <th className="py-3 px-6 text-left">Email</th>
-                  <th className="py-3 px-6 text-center">Role</th>
-                  <th className="py-3 px-6 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600 text-sm font-light">
-                <UserRow name="John Doe" email="john@example.com" role="Admin" />
-                <UserRow name="Jane Smith" email="jane@example.com" role="User" />
-                <UserRow name="Bob Johnson" email="bob@example.com" role="Editor" />
-                {/* Add more rows as needed */}
-              </tbody>
-            </table>
+      <AdminNavbar />
+      <div className="bg-gray-100 min-h-screen">
+        <div className="container mx-auto px-4 py-8">
+          <div className="lg:col-span-2 bg-white p-6">
+            <div className="flex">
+              <div className="">
+                <DashboardCard
+                  icon={<FaUsers />}
+                  title="Total Users"
+                  value={users.length}
+                />
+              </div>
+              <div className="mb-2 w-80 flex items-center">
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="border border-gray-300 rounded-l px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="bg-blue-500 text-white px-4 py-3 rounded-r">
+                  <FaSearch />
+                </div>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full table-auto">
+                <thead>
+                  <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                    <th className="py-3 px-6 text-left">Name</th>
+                    <th className="py-3 px-6 text-left">Email</th>
+                    <th className="py-3 px-2 text-center">Edit</th>
+                    <th className="py-3 px-2 text-center">Delete</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-600 text-sm font-light">
+                  {currentUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="py-3 px-6 text-center">
+                        No users found
+                      </td>
+                    </tr>
+                  ) : (
+                    currentUsers.map((user) => (
+                      <UserRow
+                        key={user._id}
+                        user={user}
+                        handleDelete={handleDelete}
+                        handleEditClick={handleEditClick}
+                      />
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-center items-center mt-6">
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span className="text-gray-700 mx-4">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
           </div>
+          {editUser && (
+            <EditUserModal
+              isOpen={Boolean(editUser)}
+              onClose={() => setEditUser(null)}
+              user={editUser}
+              onUpdate={handleUpdateUser}
+            />
+          )}
         </div>
       </div>
-    </div>
     </>
-
   );
 };
 
 const DashboardCard = ({ icon, title, value }) => (
-  <div className="bg-white rounded-lg shadow-md p-6 flex items-center">
+  <div className="bg-white p-6 flex items-center">
     <div className="text-3xl text-blue-500 mr-4">{icon}</div>
     <div>
       <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
       <p className="text-2xl font-bold text-gray-600">{value}</p>
     </div>
   </div>
-);
-
-const UserRow = ({ name, email, role }) => (
-  <tr className="border-b border-gray-200 hover:bg-gray-100">
-    <td className="py-3 px-6 text-left whitespace-nowrap">
-      <div className="flex items-center">
-        <span className="font-medium">{name}</span>
-      </div>
-    </td>
-    <td className="py-3 px-6 text-left">
-      <div className="flex items-center">
-        <span>{email}</span>
-      </div>
-    </td>
-    <td className="py-3 px-6 text-center">
-      <span className="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">
-        {role}
-      </span>
-    </td>
-    <td className="py-3 px-6 text-center">
-      <div className="flex item-center justify-center">
-        <button className="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-        </button>
-        <button className="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </button>
-        <button className="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
-      </div>
-    </td>
-  </tr>
-  
-
 );
 
 export default AdminDashboard;

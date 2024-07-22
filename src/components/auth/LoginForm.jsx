@@ -18,8 +18,10 @@ const LoginForm = () => {
     e.preventDefault();
     setError(null);
     try {
+      console.log("hiiiiiiiiiiiiiiiii");
     const response = await axios.post('/api/auth/login', { email, password });
     const { user, token } = response.data;
+    console.log("response.data",response.data);
 
     dispatch(setUser(user));
     dispatch(setToken(token));
