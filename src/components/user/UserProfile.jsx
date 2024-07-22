@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../../redux/features/auth/authSlice";
 import axios from "axios";
@@ -9,7 +9,7 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  // const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
 
@@ -41,17 +41,13 @@ const UserProfile = () => {
     }
   };
 
-
-  
-
-
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append('profileImage', file);
-    console.log("formdata",formData);
+    
     try {
       const config = {
         headers: {
@@ -59,8 +55,6 @@ const UserProfile = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      console.log("config",config.headers);
-
       const response = await axios.post("http://localhost:5000/api/user/uploadProfileImage", formData, config);
 
       if (response.status === 200) {
@@ -70,41 +64,68 @@ const UserProfile = () => {
         console.error("Error uploading image:", response.data.message);
       }
     } catch (error) {
-      console.error("Error uploading imagee:", error);
+      console.error("Error uploading image:", error);
     }
   };
-  
-  
 
+  const handleDeleteImage = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      console.log("delt img 1");
+      
+      const response = await axios.delete("http://localhost:5000/api/user/deleteProfileImage", config);
+      console.log("delt img 2");
 
-
-
+      if (response.status === 200) {
+        console.log('Image deleted successfully:', response.data);
+        dispatch(updateUser({ ...user, profileImage: null }));
+      } else {
+        console.error("Error deleting image:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting imagee:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-8">
       <div className="max-w-4xl w-full bg-white shadow-2xl overflow-hidden rounded-2xl">
         <div className="md:flex">
           <div className="md:w-2/4 bg-gradient-to-b from-emerald-400 to-teal-600 p-4 flex flex-col items-center justify-center relative">
-            <div className="w-72 h-72 rounded-full bg-white border-4 border-emerald-200 shadow-lg flex items-center justify-center mb-6 relative overflow-hidden">
-            <label
-                htmlFor="fileInput"
-                className="z-1000 absolute top-12 right-4 bg-emerald-500 text-white p-3 rounded-full transform hover:scale-110 transition duration-300 cursor-pointer"
-              >
-                <FaEdit />
-              </label>
-              <img
-                className="h-auto max-w-full"
-                src={`http://localhost:5000${user.profileImage || "/profile-images/def-pic.jpeg"}`}
-                alt="Profile"
-              />
-              
-              <input
-                id="fileInput"
-                type="file"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-            </div>
+          <div className="w-72 h-72 rounded-full bg-white border-4 border-emerald-200 shadow-lg flex items-center justify-center mb-6 overflow-hidden ">
+  <div className="absolute bottom-5 right-5 flex space-x-3">
+    <label
+      htmlFor="fileInput"
+      className="bg-emerald-500 text-white p-3 rounded-full transform hover:scale-110 transition duration-300 cursor-pointer"
+    >
+      <FaEdit />
+    </label>
+    <button
+      type="button"
+      onClick={handleDeleteImage}
+      className="bg-red-500 text-white p-3 rounded-full transform hover:scale-110 transition duration-300 cursor-pointer"
+    >
+      <FaTrash />
+    </button>
+  </div>
+  <img
+    className="h-auto max-w-full"
+    src={`http://localhost:5000${user.profileImage || "/profile-images/def-pic.jpeg"}`}
+    alt="Profile"
+  />
+  <input
+    id="fileInput"
+    type="file"
+    className="hidden"
+    onChange={handleFileChange}
+  />
+</div>
+
+            
             <h1 className="text-3xl font-bold text-white text-center mb-2">
               {user.name}
             </h1>
@@ -112,7 +133,7 @@ const UserProfile = () => {
               className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded-full mt-4"
               onClick={toggleEditing}
             >
-              Edit Profile
+              Edit Details
             </button>
           </div>
 
@@ -120,7 +141,7 @@ const UserProfile = () => {
             {isEditing ? (
               <div>
                 <h2 className="text-3xl font-semibold text-emerald-600 mb-6">
-                  Edit Profile
+                  Edit Details
                 </h2>
                 <form className="grid grid-cols-1 gap-6">
                   <div>
