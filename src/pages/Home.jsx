@@ -19,7 +19,9 @@ function Home() {
         <main className="flex-grow container mx-auto flex flex-col items-center justify-center text-center p-4">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Welcome to User Management System
+            
           </h1>
+
           <p className="text-lg text-gray-600 mb-8">
             Manage your users efficiently with our powerful user management
             tools.

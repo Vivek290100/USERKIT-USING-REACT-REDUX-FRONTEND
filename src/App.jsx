@@ -10,7 +10,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const App = () => {
   const dispatch = useDispatch()
-  // const navigate = useNavigate();
   const userData = useSelector((state) => state.auth.user)
   console.log("userData",userData);
   return (
