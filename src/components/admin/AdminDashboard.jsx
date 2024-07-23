@@ -81,7 +81,7 @@ const AdminDashboard = () => {
   };
 
   const handleUpdateUser = () => {
-    fetchUsers(); // Refresh the user list
+    fetchUsers(); 
     setEditUser(null);
   };
 
