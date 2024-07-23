@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUser } from "../../redux/features/auth/authSlice";
+import { setUser, updateUser } from "../../redux/features/auth/authSlice";
 import axios from "axios";
 
 const UserProfile = () => {
@@ -9,9 +9,29 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [profileImage, setProfileImage] = useState(null);
+  // const [profileImage, setProfileImage] = useState(null);
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+        const response = await axios.get('http://localhost:5000/api/user/profile', config);
+        console.log("getting profile pic");
+        // setUser(response.data);
+        dispatch(setUser(response.data));
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, [token, dispatch]);
 
   const toggleEditing = () => {
     setIsEditing(!isEditing);
@@ -59,7 +79,9 @@ const UserProfile = () => {
 
       if (response.status === 200) {
         console.log('Image uploaded successfully:', response.data);
-        dispatch(updateUser({ ...user, profileImage: response.data.profileImage }));
+        dispatch(updateUser({ ...user, dp: response.data.profileImage }));
+
+        // dispatch(updateUser({ ...user, profileImage: response.data.profileImage }));
       } else {
         console.error("Error uploading image:", response.data.message);
       }
@@ -82,7 +104,8 @@ const UserProfile = () => {
 
       if (response.status === 200) {
         console.log('Image deleted successfully:', response.data);
-        dispatch(updateUser({ ...user, profileImage: null }));
+        dispatch(updateUser({ ...user, dp: null }));
+        // dispatch(updateUser({ ...user, profileImage: null }));
       } else {
         console.error("Error deleting image:", response.data.message);
       }
@@ -97,10 +120,10 @@ const UserProfile = () => {
         <div className="md:flex">
           <div className="md:w-2/4 bg-gradient-to-b from-emerald-400 to-teal-600 p-4 flex flex-col items-center justify-center relative">
           <div className="w-72 h-72 rounded-full bg-white border-4 border-emerald-200 shadow-lg flex items-center justify-center mb-6 overflow-hidden ">
-  <div className="absolute bottom-5 right-5 flex space-x-3">
+  <div className="absolute bottom-15 right-2 flex space-x-3">
     <label
       htmlFor="fileInput"
-      className="bg-emerald-500 text-white p-3 rounded-full transform hover:scale-110 transition duration-300 cursor-pointer"
+      className="bg-emerald-400 text-white p-3 rounded-full transform hover:scale-110 transition duration-300 cursor-pointer"
     >
       <FaEdit />
     </label>
@@ -114,7 +137,9 @@ const UserProfile = () => {
   </div>
   <img
     className="h-auto max-w-full"
-    src={`http://localhost:5000${user.profileImage || "/profile-images/def-pic.jpeg"}`}
+    // src={`http://localhost:5000${user.dp ? user.dp : '/profile-images/def_prof.jpg'}`}
+    src={`http://localhost:5000${user.dp || '/profile-images/def-pic.jpeg'}`}
+
     alt="Profile"
   />
   <input

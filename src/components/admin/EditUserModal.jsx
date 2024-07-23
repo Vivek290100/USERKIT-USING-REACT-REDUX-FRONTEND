@@ -16,21 +16,26 @@ const EditUserModal = ({ isOpen, onClose, user, onUpdate }) => {
     }
   }, [user]);
 
- // EditUserModal.jsx
  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log('Submitting profile update:', { name, email }); // Add this line
+    console.log('Submitting profile update:', { name, email }); 
     try {
+      const values = { name, email };
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      console.log("values",values);
+      console.log("config",config);
       await axios.put(
-        'http://localhost:5000/api/admin/updateProfile',
-        { name, email },
-        { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
-      );
-      onUpdate(); // Refresh the user list after update
+        `http://localhost:5000/api/admin/updateUser/${user._id}`,values, config );
+      console.log("1234567890");
+      onUpdate();
       onClose();
     } catch (err) {
-      console.error('Update failed:', err); // Add this line
+      console.error('Update failed:', err); 
     } finally {
       setLoading(false);
     }
