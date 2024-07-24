@@ -6,6 +6,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import UserRow from "./UserRow";
 import EditUserModal from "./EditUserModal";
+import AddUserModal from "./AddUserModal";
 import { toast, Toaster } from "react-hot-toast";
 
 const AdminDashboard = () => {
@@ -15,6 +16,7 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [editUser, setEditUser] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const usersPerPage = 6;
   const token = useSelector((state) => state.auth.token);
 
@@ -75,7 +77,7 @@ const AdminDashboard = () => {
         }
       );
       setUsers(users.filter((user) => user.email !== email));
-      toast.success("User Deleted Successfully !");
+      toast.success("User Deleted Successfully!");
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -91,6 +93,10 @@ const AdminDashboard = () => {
   const handleUpdateUser = () => {
     fetchUsers();
     setEditUser(null);
+  };
+
+  const handleAddUser = (newUser) => {
+    setUsers([...users, newUser]);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -123,7 +129,10 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="ml-auto ">
-                <button className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-28 rounded shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                <button 
+                  className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-28 rounded shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                  onClick={() => setIsAddModalOpen(true)}
+                >
                   <FaPlus className="mr-2" /> Add User
                 </button>
               </div>
@@ -186,6 +195,11 @@ const AdminDashboard = () => {
               onUpdate={handleUpdateUser}
             />
           )}
+          <AddUserModal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            onAddUser={handleAddUser}
+          />
         </div>
       </div>
       <Toaster />
