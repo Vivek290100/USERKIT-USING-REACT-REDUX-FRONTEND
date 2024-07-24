@@ -3,12 +3,16 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, updateUser } from "../../redux/features/auth/authSlice";
 import axios from "axios";
+import {toast, Toaster} from "react-hot-toast"
+import { validateEditUser } from '../../validation/modalValidation';
+
 
 const UserProfile = () => {
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState({});
   // const [profileImage, setProfileImage] = useState(null);
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
@@ -40,6 +44,11 @@ const UserProfile = () => {
   };
 
   const handleUpdateProfile = async () => {
+    const validationErrors = validateEditUser(name, email);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
     try {
       const values = { name, email };
       const config = {
@@ -53,6 +62,8 @@ const UserProfile = () => {
       if (editData.status === 200) {
         dispatch(updateUser({ name, email }));
         setIsEditing(false);
+        toast.success('Edited Successfully !')
+
       } else {
         console.error("Error updating profile:", editData.data.message);
       }
@@ -76,12 +87,11 @@ const UserProfile = () => {
         },
       };
       const response = await axios.post("http://localhost:5000/api/user/uploadProfileImage", formData, config);
-
       if (response.status === 200) {
         console.log('Image uploaded successfully:', response.data);
         dispatch(updateUser({ ...user, dp: response.data.profileImage }));
+        toast.success('Image Updated Successfully !')
 
-        // dispatch(updateUser({ ...user, profileImage: response.data.profileImage }));
       } else {
         console.error("Error uploading image:", response.data.message);
       }
@@ -105,7 +115,7 @@ const UserProfile = () => {
       if (response.status === 200) {
         console.log('Image deleted successfully:', response.data);
         dispatch(updateUser({ ...user, dp: null }));
-        // dispatch(updateUser({ ...user, profileImage: null }));
+        toast.success('Image Removed Successfully !')
       } else {
         console.error("Error deleting image:", response.data.message);
       }
@@ -115,12 +125,12 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-8">
-      <div className="max-w-4xl w-full bg-white shadow-2xl overflow-hidden rounded-2xl">
+    <div className="h-screen bg-black  flex items-center justify-center p-8">
+      <div className="max-w-4xl  w-full bg-sky-950 shadow-2xl overflow-hidden rounded-2xl">
         <div className="md:flex">
-          <div className="md:w-2/4 bg-gradient-to-b from-emerald-400 to-teal-600 p-4 flex flex-col items-center justify-center relative">
+          <div className="md:w-2/4 bg-sky-950 from-emerald-400 to-teal-600 p-4 flex flex-col items-center justify-center relative">
           <div className="w-72 h-72 rounded-full bg-white border-4 border-emerald-200 shadow-lg flex items-center justify-center mb-6 overflow-hidden ">
-  <div className="absolute bottom-15 right-2 flex space-x-3">
+  <div className=" absolute bottom-4 right-12 flex space-x-3">
     <label
       htmlFor="fileInput"
       className="bg-emerald-400 text-white p-3 rounded-full transform hover:scale-110 transition duration-300 cursor-pointer"
@@ -137,7 +147,6 @@ const UserProfile = () => {
   </div>
   <img
     className="h-auto max-w-full"
-    // src={`http://localhost:5000${user.dp ? user.dp : '/profile-images/def_prof.jpg'}`}
     src={`http://localhost:5000${user.dp || '/profile-images/def-pic.jpeg'}`}
 
     alt="Profile"
@@ -170,7 +179,7 @@ const UserProfile = () => {
                 </h2>
                 <form className="grid grid-cols-1 gap-6">
                   <div>
-                    <label htmlFor="name" className="text-gray-600 mb-1">
+                    <label htmlFor="name" className="text-white mb-1">
                       Name
                     </label>
                     <input
@@ -180,9 +189,12 @@ const UserProfile = () => {
                       onChange={(e) => setName(e.target.value)}
                       className="border border-gray-300 px-3 py-2 rounded-md w-full"
                     />
+                     {errors.name && (
+                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              )}
                   </div>
                   <div>
-                    <label htmlFor="email" className="text-gray-600 mb-1">
+                    <label htmlFor="email" className="text-white mb-1">
                       Email
                     </label>
                     <input
@@ -192,6 +204,9 @@ const UserProfile = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       className="border border-gray-300 px-3 py-2 rounded-md w-full"
                     />
+                     {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
                   </div>
                   <div className="mt-4">
                     <button
@@ -218,23 +233,23 @@ const UserProfile = () => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-gray-600 mb-1">Name</p>
-                    <p className="font-medium text-gray-800">{user.name}</p>
+                    <p className="text-white mb-1">Name</p>
+                    <p className="font-medium text-emerald-600">{user.name}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600 mb-1">Email</p>
-                    <p className="font-medium text-gray-800">{user.email}</p>
+                    <p className="text-white mb-1">Email</p>
+                    <p className="font-medium text-emerald-600">{user.email}</p>
                   </div>
                   <div>
-                    <p className="text-gray-600 mb-1">Cell Phone</p>
-                    <p className="font-medium text-gray-800">
+                    <p className="text-white mb-1">Cell Phone</p>
+                    <p className="font-medium text-emerald-600">
                       +91 9876543210
                     </p>
                   </div>
 
                   <div className="md:col-span-2">
-                    <p className="text-gray-600 mb-1">Address</p>
-                    <p className="font-medium text-gray-800">
+                    <p className="text-white mb-1">Address</p>
+                    <p className="font-medium text-emerald-600">
                       123 Main St, Anytown, ST 12345
                     </p>
                   </div>
@@ -266,8 +281,9 @@ const UserProfile = () => {
             )}
           </div>
         </div>
+    </div> 
+    <Toaster />
       </div>
-    </div>
   );
 };
 

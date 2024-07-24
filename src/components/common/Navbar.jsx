@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { clearAuth } from '../../redux/features/auth/authSlice';
+import {toast, Toaster} from "react-hot-toast"
+
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,13 +11,14 @@ const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
 
   const handleLogout = () => {
+    toast.success('Successfully Logout!')
     // Clear user authentication state in Redux
     dispatch(clearAuth());
     // Additional logic for clearing local storage or session storage
   };
 
   return (
-    <nav className="bg-gray-800 p-4">
+    <nav className="bg-black p-4">
       <div className="container mx-auto flex justify-between items-center">
         <div className="text-white text-2xl px-9 font-bold">
           <Link to="/">USERKIT</Link>
@@ -78,7 +81,9 @@ const Navbar = () => {
           )}
         </div>
       )}
+        <Toaster />
     </nav>
+
   );
 };
 

@@ -5,7 +5,7 @@ const UserRow = ({ user, handleDelete, handleEditClick }) => {
   const { name, email } = user;
 
   return (
-    <tr className="border-b border-gray-200 hover:bg-gray-100">
+    <tr className="border-b border-gray-200 hover:bg-gray-800">
       <td className="py-4 px-6 text-left whitespace-nowrap text-lg">
         <div className="flex items-center">
           <span className="font-medium">{name}</span>
